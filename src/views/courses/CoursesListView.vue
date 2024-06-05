@@ -1,19 +1,20 @@
 <template>
     <h2>Agregar Curso</h2>
-    <form action="" method="post">
+    <form @submit.prevent="addCourse">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <label for="title" class="label">Título</label>
-            <input type="text" name="title" id="title" class="input" placeholder="Ingrese título del curso">
+            <input v-model="course.title" type="text" name="title" id="title" class="input" placeholder="Ingrese título del curso">
         </div>
         
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 10px;">
             <label for="title" class="label">Descripción</label>
-            <textarea name="title" id="title" class="input" rows="3" placeholder="Ingrese una descripción"></textarea>
+            <textarea v-model="course.description" name="title" id="title" class="input" rows="3" placeholder="Ingrese una descripción"></textarea>
         </div>
 
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 10px;">
             <label for="category_id" class="label">Categoría</label>
-            <select name="category_id" id="category_id" class="input">
+            <select v-model="course.category_id" name="category_id" id="category_id" class="input">
+                <option value="" selected disabled>Selecciona una categoría</option>
                 <option v-for="category in categories" :key="'category-' + category.id" :value="category.id">{{ category.name }}</option>
             </select>
         </div>
@@ -36,6 +37,11 @@ export default {
         return {
             courses: [],
             categories: [],
+            course: {
+                title: '',
+                description: '',
+                category_id: ''
+            }
         }
     },
     created(){
@@ -56,6 +62,22 @@ export default {
             this.axios('http://academy.test/api/categories')
                 .then(response => {
                     this.categories = response.data
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+        addCourse(){
+            this.axios.post('http://academy.test/api/courses', this.course)
+                .then( response => {
+                    console.log(response)
+                    // this.getCourses()
+                    this.courses.push(response.data)
+                    this.course = {
+                        title: '',
+                        description: '',
+                        category_id: ''
+                    }
                 })
                 .catch(error => {
                     console.log(error)
