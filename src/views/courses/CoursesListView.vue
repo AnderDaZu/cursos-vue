@@ -26,7 +26,8 @@
     <ul>
         <li v-for="course in courses" :key="'course' + course.id">
             {{ course.id }}. {{ course.title }} 
-            <router-link :to="{ name: 'courseDetails', params: { id: course.id } }">👁️‍🗨️</router-link>
+            <router-link :to="{ name: 'courseDetails', params: { id: course.id } }">👁️‍🗨️</router-link> ||
+            <button @click="deleteCourse(course.id)">Eliminar</button>
         </li>
     </ul>
 </template>
@@ -71,13 +72,25 @@ export default {
             this.axios.post('http://academy.test/api/courses', this.course)
                 .then( response => {
                     console.log(response)
-                    // this.getCourses()
-                    this.courses.push(response.data)
+                    this.getCourses()
+                    // this.courses.push(response.data)
                     this.course = {
                         title: '',
                         description: '',
                         category_id: ''
                     }
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+        },
+        deleteCourse(id){
+            
+            this.axios.delete('http://academy.test/api/courses/' + id)
+                .then( response => {
+                    console.log(response)
+                    // this.getCourses()
+                    this.courses = this.courses.filter( course => course.id != id );
                 })
                 .catch(error => {
                     console.log(error)
