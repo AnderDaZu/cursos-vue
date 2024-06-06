@@ -7,6 +7,9 @@
         <b>Categoría:</b>
         {{ category.name }}
     </p>
+
+    <router-link :to="{ name: 'courseEdit', params: { id: course.id } }">Editar curso</router-link>
+
     <!-- {{ course }} -->
 </template>
 

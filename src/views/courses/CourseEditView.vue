@@ -1,6 +1,7 @@
 <template>
-    <h2>Agregar Curso</h2>
-    <form @submit.prevent="addCourse">
+    <h2>Editar Curso</h2>
+
+    <form @submit.prevent="updateCourse">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <label for="title" class="label">Título</label>
             <input v-model="course.title" type="text" name="title" id="title" class="input" placeholder="Ingrese título del curso">
@@ -19,47 +20,40 @@
             </select>
         </div>
 
-        <button type="submit" class="button">Agregar</button>
+        <button type="submit" class="button">Actualizar</button>
     </form>
 
-    <h2>Lista de Cursos</h2>
-    <ul>
-        <li v-for="course in courses" :key="'course' + course.id">
-            {{ course.id }}. {{ course.title }} 
-            <router-link :to="{ name: 'courseDetails', params: { id: course.id } }">👁️‍🗨️</router-link> ||
-            <router-link :to="{ name: 'courseEdit', params: { id: course.id } }">🖋️</router-link> ||
-            <button @click="deleteCourse(course.id)">Eliminar</button>
-        </li>
-    </ul>
 </template>
 
 <script>
 export default {
     data(){
         return {
-            courses: [],
-            categories: [],
             course: {
                 title: '',
                 description: '',
                 category_id: ''
-            }
+            },
+            categories: []
         }
     },
+
     created(){
-        this.getCourses(),
+        this.getCourse()
         this.getCategories()
     },
+
     methods: {
-        getCourses(){
-            this.axios.get('http://academy.test/api/courses')
+        getCourse(){
+            this.axios.get('http://academy.test/api/courses/' + this.$route.params.id + '?included=category')
                 .then(response => {
-                    this.courses = response.data
+                    this.course = response.data
                 })
                 .catch(error => {
                     console.log(error)
                 })
         },
+
         getCategories(){
             this.axios('http://academy.test/api/categories')
                 .then(response => {
@@ -69,29 +63,13 @@ export default {
                     console.log(error)
                 })
         },
-        addCourse(){
-            this.axios.post('http://academy.test/api/courses', this.course)
-                .then( response => {
+
+        updateCourse(){
+            this.axios.put('http://academy.test/api/courses/' + this.$route.params.id, this.course)
+                .then(response => {
                     console.log(response)
-                    this.getCourses()
-                    // this.courses.push(response.data)
-                    this.course = {
-                        title: '',
-                        description: '',
-                        category_id: ''
-                    }
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-        },
-        deleteCourse(id){
-            
-            this.axios.delete('http://academy.test/api/courses/' + id)
-                .then( response => {
-                    console.log(response)
-                    // this.getCourses()
-                    this.courses = this.courses.filter( course => course.id != id );
+                    // this.$router.push('/courses')
+                    this.$router.push({ name: 'courseDetails', params: { id: this.$route.params.id } })
                 })
                 .catch(error => {
                     console.log(error)
