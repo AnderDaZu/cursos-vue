@@ -1,5 +1,13 @@
 <template>
     <h2>Agregar Curso</h2>
+
+    <!-- {{ errors }} -->
+    <ul v-if="errors.length > 0">
+        <li v-for="error in errors" :key="error.id" class="error">
+            {{ error }}
+        </li>
+    </ul>
+
     <form @submit.prevent="addCourse">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <label for="title" class="label">Título</label>
@@ -43,7 +51,8 @@ export default {
                 title: '',
                 description: '',
                 category_id: ''
-            }
+            },
+            errors: [],
         }
     },
     created(){
@@ -80,9 +89,11 @@ export default {
                         description: '',
                         category_id: ''
                     }
+                    this.errors = []
                 })
                 .catch(error => {
                     console.log(error)
+                    this.errors = Object.values(error.response.data.errors).flat()
                 })
         },
         deleteCourse(id){
@@ -130,5 +141,13 @@ export default {
     width: 300px;
     margin-top: 20px;
     cursor: pointer;
+}
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 6px;
+    margin-bottom: 0;
+    padding: 0;
+    text-align: left;
 }
 </style>

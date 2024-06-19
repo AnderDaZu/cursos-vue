@@ -1,6 +1,13 @@
 <template>
     <h2>Editar Curso</h2>
 
+    <!-- {{ errors }} -->
+    <ul v-if="errors.length > 0">
+        <li v-for="error in errors" :key="error.id" class="error">
+            {{ error }}
+        </li>
+    </ul>
+
     <form @submit.prevent="updateCourse">
         <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
             <label for="title" class="label">Título</label>
@@ -34,7 +41,8 @@ export default {
                 description: '',
                 category_id: ''
             },
-            categories: []
+            categories: [],
+            errors: [],
         }
     },
 
@@ -73,6 +81,7 @@ export default {
                 })
                 .catch(error => {
                     console.log(error)
+                    this.errors = Object.values(error.response.data.errors).flat()
                 })
         }
     }
