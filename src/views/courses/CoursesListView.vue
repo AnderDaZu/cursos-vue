@@ -27,18 +27,42 @@
             </select>
         </div>
 
-        <button type="submit" class="button">Agregar</button>
+        <button type="submit" class="btn btn-success btn-md mt-2 mb-4">Agregar</button>
     </form>
 
     <h2>Lista de Cursos</h2>
     <ul>
-        <li v-for="course in courses" :key="'course' + course.id">
+        <li v-for="course in courses" :key="'course' + course.id" class="mb-2">
             {{ course.id }}. {{ course.title }} 
-            <router-link :to="{ name: 'courseDetails', params: { id: course.id } }">👁️‍🗨️</router-link> ||
-            <router-link :to="{ name: 'courseEdit', params: { id: course.id } }">🖋️</router-link> ||
-            <button @click="deleteCourse(course.id)">Eliminar</button>
+            <router-link :to="{ name: 'courseDetails', params: { id: course.id } }" class="btn btn-secondary py-0 px-2">👁️‍🗨️</router-link> ||
+            <router-link :to="{ name: 'courseEdit', params: { id: course.id } }" class="btn btn-primary py-0 px-2">Editar</router-link> ||
+            <button @click="deleteCourse(course.id)" class="btn btn-danger py-0 px-2">Eliminar</button>
         </li>
     </ul>
+
+    <!-- paginación -->
+     <div class="d-flex justify-content-center">
+         <nav aria-label="...">
+             <ul class="pagination">
+                 <li class="page-item" 
+                    v-for="pagination_link in pagination_links" 
+                    :key="'pagination_link-' + pagination_link.label"
+                    :class="{ 
+                        'disabled': pagination_link.url == null,
+                        'active': pagination_link.active
+                    }">
+                     <!-- no se agrega nada ya que el valor que viene, viene en html por ello mejor se usa -->
+                    <a class="page-link" 
+                        @click="changePage(pagination_link.url)"
+                        v-html="pagination_link.label" 
+                        style="cursor: pointer;">
+                    </a>
+                </li>
+             </ul>
+         </nav>
+     </div>
+
+     <!-- {{ pagination_links }} -->
 </template>
 
 <script>
@@ -53,17 +77,32 @@ export default {
                 category_id: ''
             },
             errors: [],
+            per_page: 10,
+            pagination_links: []
         }
     },
     created(){
         this.getCourses(),
         this.getCategories()
     },
+    computed: {
+        page(){
+            // devuelve la el numero de página que el usuario esta enviando en la url, ej: http://localhost:8080/courses?page=1
+            return this.$route.query.page ?? 1
+        }
+    },
+    watch: {
+        page(){
+            this.getCourses()
+        }
+    },
     methods: {
         getCourses(){
-            this.axios.get('http://academy.test/api/courses')
+            this.axios.get('http://academy.test/api/courses?per_page=' + this.per_page + '&page=' + this.page)
                 .then(response => {
-                    this.courses = response.data
+                    let res = response.data
+                    this.courses = res.data
+                    this.pagination_links = res.links
                 })
                 .catch(error => {
                     console.log(error)
@@ -107,6 +146,13 @@ export default {
                 .catch(error => {
                     console.log(error)
                 })
+        },
+        changePage(url){
+            this.$router.replace({
+                query: {
+                    page: url.split('page=')[1]
+                }
+            })
         }
     }
 }
@@ -131,7 +177,7 @@ export default {
     min-width: 300px;
     width: 300px;
 }
-.button {
+.button-cstm {
     background: #42b983;
     border: none;
     border-radius: 5px;
