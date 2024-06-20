@@ -8,31 +8,43 @@
         </li>
     </ul>
 
-    <form @submit.prevent="addCourse">
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <label for="title" class="label">Título</label>
-            <input v-model="course.title" type="text" name="title" id="title" class="input" placeholder="Ingrese título del curso">
-        </div>
-        
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 10px;">
-            <label for="title" class="label">Descripción</label>
-            <textarea v-model="course.description" name="title" id="title" class="input" rows="3" placeholder="Ingrese una descripción"></textarea>
-        </div>
-
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; margin-top: 10px;">
-            <label for="category_id" class="label">Categoría</label>
-            <select v-model="course.category_id" name="category_id" id="category_id" class="input">
-                <option value="" selected disabled>Selecciona una categoría</option>
-                <option v-for="category in categories" :key="'category-' + category.id" :value="category.id">{{ category.name }}</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-success btn-md mt-2 mb-4">Agregar</button>
-    </form>
+    <div class="card mb-4">
+        <form @submit.prevent="addCourse" class="card-body">
+            <div class="mb-2">
+                <label for="title" class="label">Título</label>
+                <input v-model="course.title" type="text" name="title" id="title" class="form-control" placeholder="Ingrese título del curso">
+            </div>
+            
+            <div class="mb-2">
+                <label for="title" class="label">Descripción</label>
+                <textarea v-model="course.description" name="title" id="title" class="form-control" rows="3" placeholder="Ingrese una descripción"></textarea>
+            </div>
+    
+            <div class="mb-2">
+                <label for="category_id" class="label">Categoría</label>
+                <select v-model="course.category_id" name="category_id" id="category_id" class="form-control">
+                    <option value="" selected disabled>Selecciona una categoría</option>
+                    <option v-for="category in categories" :key="'category-' + category.id" :value="category.id">{{ category.name }}</option>
+                </select>
+            </div>
+    
+            <button type="submit" class="btn btn-success btn-md mt-2 mb-2">Agregar</button>
+        </form>
+    </div>
 
     <h2>Lista de Cursos</h2>
-    <ul>
-        <li v-for="course in courses" :key="'course' + course.id" class="mb-2">
+
+    <div class="text-start d-flex flex-column flex-sm-row column-gap-3 mb-2 ">
+        <h3 class="">Buscador</h3>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">🔍</span>
+            <input v-model="search" type="text" class="form-control" placeholder="Ingrese una palabra para filtrar">
+        </div>
+    </div>
+
+    <ul class="list-group">
+        <li v-for="course in courses" :key="'course' + course.id" class="list-group-item mb-2">
             {{ course.id }}. {{ course.title }} 
             <router-link :to="{ name: 'courseDetails', params: { id: course.id } }" class="btn btn-secondary py-0 px-2">👁️‍🗨️</router-link> ||
             <router-link :to="{ name: 'courseEdit', params: { id: course.id } }" class="btn btn-primary py-0 px-2">Editar</router-link> ||
@@ -77,7 +89,8 @@ export default {
             },
             errors: [],
             per_page: 10,
-            pagination: {}
+            pagination: {},
+            search: '',
         }
     },
     created(){
@@ -107,11 +120,14 @@ export default {
     watch: {
         page(){
             this.getCourses()
+        },
+        search(){
+            this.getCourses()
         }
     },
     methods: {
         getCourses(){
-            this.axios.get('http://academy.test/api/courses?per_page=' + this.per_page + '&page=' + this.page)
+            this.axios.get('http://academy.test/api/courses?per_page=' + this.per_page + '&page=' + this.page + '&filter[title]=' + this.search)
                 .then(response => {
                     let res = response.data
                     this.courses = res.data
