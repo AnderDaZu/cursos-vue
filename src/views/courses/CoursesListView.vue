@@ -45,7 +45,7 @@
          <nav aria-label="...">
              <ul class="pagination">
                  <li class="page-item" 
-                    v-for="pagination_link in pagination_links" 
+                    v-for="pagination_link in pagination.links" 
                     :key="'pagination_link-' + pagination_link.label"
                     :class="{ 
                         'disabled': pagination_link.url == null,
@@ -62,7 +62,6 @@
          </nav>
      </div>
 
-     <!-- {{ pagination_links }} -->
 </template>
 
 <script>
@@ -78,7 +77,7 @@ export default {
             },
             errors: [],
             per_page: 10,
-            pagination_links: []
+            pagination: {}
         }
     },
     created(){
@@ -88,7 +87,21 @@ export default {
     computed: {
         page(){
             // devuelve la el numero de página que el usuario esta enviando en la url, ej: http://localhost:8080/courses?page=1
-            return this.$route.query.page ?? 1
+            // return this.$route.query.page ?? 1
+
+            let page = this.$route.query.page ?? 1
+
+            if ( page > this.pagination.last_page )
+            {
+                this.$router.replace({
+                    query: {
+                        page: this.pagination.last_page
+                    }
+                })
+                return this.pagination.last_page
+            }
+
+            return page
         }
     },
     watch: {
@@ -102,7 +115,11 @@ export default {
                 .then(response => {
                     let res = response.data
                     this.courses = res.data
-                    this.pagination_links = res.links
+                    this.pagination = {
+                        links: res.links,
+                        last_page: res.last_page
+
+                    }
                 })
                 .catch(error => {
                     console.log(error)
@@ -141,7 +158,8 @@ export default {
                 .then( response => {
                     console.log(response)
                     // this.getCourses()
-                    this.courses = this.courses.filter( course => course.id != id );
+                    // this.courses = this.courses.filter( course => course.id != id );
+                    this.getCourses()
                 })
                 .catch(error => {
                     console.log(error)
