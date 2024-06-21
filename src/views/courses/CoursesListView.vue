@@ -127,7 +127,17 @@ export default {
     },
     methods: {
         getCourses(){
-            this.axios.get('http://academy.test/api/courses?per_page=' + this.per_page + '&page=' + this.page + '&filter[title]=' + this.search)
+            // this.axios.get('http://academy.test/api/courses?per_page=' + this.per_page + '&page=' + this.page + '&filter[title]=' + this.search)
+            this.axios.get('http://academy.test/api/courses', {
+                params: {
+                    per_page: this.per_page,
+                    page: this.page,
+                    filter: {
+                        title: this.search
+                    },
+                    // 'filter[title]': this.search
+                }
+            })
                 .then(response => {
                     let res = response.data
                     this.courses = res.data
