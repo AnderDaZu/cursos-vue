@@ -77,7 +77,61 @@
 </template>
 
 <script>
+
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 export default {
+
+    // composition api
+    setup(){ // se ejecuta antes de crearse el componente
+        // const pagination = {}
+        const pagination = ref({}) // ref permite asignar valores de manera dinamica
+        const route = useRoute() // permite obtener la ruta actual
+        const router = useRouter() // permite redireccionar a otras rutas
+
+        const setPagination = ( response ) => {
+            pagination.value = {
+                links: response.links,
+                last_page: response.last_page
+            }
+        }
+
+        // Propiedades computadas
+        const page = computed( () => {
+
+            let page = route.query.page ?? 1
+
+            if ( page > pagination.value.last_page )
+            {
+                router.replace({
+                    query: {
+                        page: pagination.value.last_page
+                    }
+                })
+                return pagination.value.last_page
+            }
+
+            return page
+        } );
+
+        const changePage = (url) => {
+            router.replace({
+                query: {
+                    page: url.split('page=')[1]
+                }
+            })  
+        }
+
+        return {
+            pagination,
+            setPagination,
+            page,
+            changePage
+        }
+    },
+
+    // options api
     data(){
         return {
             courses: [],
@@ -89,7 +143,7 @@ export default {
             },
             errors: [],
             per_page: 10,
-            pagination: {},
+            // pagination: {},
             search: '',
         }
     },
@@ -98,24 +152,24 @@ export default {
         this.getCategories()
     },
     computed: {
-        page(){
-            // devuelve la el numero de página que el usuario esta enviando en la url, ej: http://localhost:8080/courses?page=1
-            // return this.$route.query.page ?? 1
+        // page(){
+        //     // devuelve la el numero de página que el usuario esta enviando en la url, ej: http://localhost:8080/courses?page=1
+        //     // return this.$route.query.page ?? 1
 
-            let page = this.$route.query.page ?? 1
+        //     let page = this.$route.query.page ?? 1
 
-            if ( page > this.pagination.last_page )
-            {
-                this.$router.replace({
-                    query: {
-                        page: this.pagination.last_page
-                    }
-                })
-                return this.pagination.last_page
-            }
+        //     if ( page > this.pagination.last_page )
+        //     {
+        //         this.$router.replace({
+        //             query: {
+        //                 page: this.pagination.last_page
+        //             }
+        //         })
+        //         return this.pagination.last_page
+        //     }
 
-            return page
-        }
+        //     return page
+        // }
     },
     watch: {
         page(){
@@ -141,11 +195,13 @@ export default {
                 .then(response => {
                     let res = response.data
                     this.courses = res.data
-                    this.pagination = {
-                        links: res.links,
-                        last_page: res.last_page
 
-                    }
+                    this.setPagination(res)
+
+                    // this.pagination = {
+                    //     links: res.links,
+                    //     last_page: res.last_page
+                    // }
                 })
                 .catch(error => {
                     console.log(error)
@@ -191,13 +247,14 @@ export default {
                     console.log(error)
                 })
         },
-        changePage(url){
-            this.$router.replace({
-                query: {
-                    page: url.split('page=')[1]
-                }
-            })
-        }
+        // changePage(url){
+        //     this.$router.replace({
+        //         query: {
+        //             page: url.split('page=')[1]
+        //         }
+        //     })
+        // }
+
     }
 }
 </script>
